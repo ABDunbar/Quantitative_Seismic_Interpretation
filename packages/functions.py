@@ -19,6 +19,47 @@ sty0 = {'lw':1, 'color':'k', 'ls':'-'}
 sty1 = {'marker':'o', 'color':'g', 'ls':'none', 'ms':6, 'mec':'none', 'alpha':0.5}
 sty2 = {'marker':'o', 'color':'r', 'ls':'none', 'ms':6, 'mec':'none', 'alpha':0.5}
 
+def rplog_convert(df, pwave_sonic, shear_sonic):
+    """
+    Convert usec/ft (DT/DTS) to velocity (VP/VS)
+    Create Impedance logs from velocity and density logs (IP/IS)
+    Create VP/VS ratio log
+    """
+    try:
+        df['VP'] = 304800 / df[pwave_sonic]
+        df["IP"] = df.VP * df.RHOB
+        df['VS'] = 304800 / df[shear_sonic]
+        df['VPVS'] = df.VP / df.VS    
+        df['IS'] = df.VS * df.RHOB
+    except Exception as e:
+        print(f"Error when creating log: {e}")
+    
+    return df
+
+def density_porosity(input_density, matrix_density=2.65, fluid_density=1):
+    """
+    from Andy McDonald github repository on Petrophysics
+    """
+    denpor = (matrix_density - input_density) / (matrix_density - fluid_density)
+    return denpor
+
+
+def vshale_from_gr(df):
+    """
+    Creates Clavier, Larionov old, Larionov new, Steiber VSH
+    """    
+    GR_min = df.GR.min()
+    GR_max = df.GR.max()
+    df.loc[:, 'IGR'] = (df.GR - GR_min) / (GR_max - GR_min)
+    df.loc[:, 'VSH_clavier'] = 1.7 - ((3.38 - (df.IGR + 0.7)**2)**0.5)
+    df.loc[:, 'VSH_larionovO'] = 0.33 * (2**(2*df.IGR)-1)
+    df.loc[:, 'VSH_steiber'] = df.IGR / (3 - 2*df.IGR)
+    df.loc[:, 'VSH_larionovT'] = 0.083*(2**(3.7*df.IGR)-1)
+    # Pick one to be "main" VSH
+    df['VSH'] = df.VSH_larionovO
+    return df
+
+
 def plotlog(L, z1, z2, cutoff_sand, cutoff_shale): 
     # define filters to select sand (ss) and shale (sh)
     ss = (L.index>=z1) & (L.index<=z2) & (L.VSH<=cutoff_sand)
@@ -73,6 +114,35 @@ def plotlog(L, z1, z2, cutoff_sand, cutoff_shale):
     
     #plt.savefig('/Users/matt/Dropbox/Agile/SEG/Tutorials/delMonte_Apr2017/Figure_1.png', dpi=300)
     plt.show()
+
+
+def filt_unfilt_diff(unfilt, filt):
+
+    print(f"LOG:\t\tUnfiltered\t:\tFiltered")
+    print('='*48)
+    print(f"GR min: \t{unfilt.GR.min():.2f} \t\t: \t{filt.GR.min():.2f}")
+    print(f"GR max: \t{unfilt.GR.max():.2f} \t\t: \t{filt.GR.max():.2f}")
+    print('-'*48)
+    print(f"VSH min: \t{unfilt.VSH.min():.2f} \t\t: \t{filt.VSH.min():.2f}")
+    print(f"VSH max: \t{unfilt.VSH.max():.2f} \t\t: \t{filt.VSH.max():.2f}")
+    print('-'*48)
+    print(f"PHIE min: \t{unfilt.PHIE.min():.2f} \t\t: \t{filt.PHIE.min():.2f}")
+    print(f"PHIE max: \t{unfilt.PHIE.max():.2f} \t\t: \t{filt.PHIE.max():.2f}")
+    print('-'*48)
+    print(f"IP min: \t{unfilt.IP.min():.2f} \t: \t{filt.IP.min():.2f}")
+    print(f"IP max: \t{unfilt.IP.max():.2f} \t: \t{filt.IP.max():.2f}")
+    print('-'*48)
+    print(f"VPVS min: \t{unfilt.VPVS.min():.2f} \t\t: \t{filt.VPVS.min():.2f}")
+    print(f"VPVS max: \t{unfilt.VPVS.max():.2f} \t\t: \t{filt.VPVS.max():.2f}")
+    print('-'*48)
+    print(f"VP min: \t{unfilt.VP.min():.2f} \t: \t{filt.VP.min():.2f}")
+    print(f"VP max: \t{unfilt.VP.max():.2f} \t: \t{filt.VP.max():.2f}")
+    print('-'*48)
+    print(f"VS min: \t{unfilt.VS.min():.2f} \t: \t{filt.VS.min():.2f}")
+    print(f"VS max: \t{unfilt.VS.max():.2f} \t: \t{filt.VS.max():.2f}")
+    print('-'*48)
+    print(f"RHOB min: \t{unfilt.RHOB.min():.2f} \t\t: \t{filt.RHOB.min():.2f}")
+    print(f"RHOB max: \t{unfilt.RHOB.max():.2f} \t\t: \t{filt.RHOB.max():.2f}")
 
 
 def vrh(f, M1, M2):
