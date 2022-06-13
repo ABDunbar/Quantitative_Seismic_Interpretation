@@ -1,13 +1,20 @@
 import warnings
-# pip install lasio
-import lasio as lasio
+
 import numpy as np
 import pandas as pd
 import platform
 import os
 from packages.functions import frm, twolayer, r0g, vshale_from_gr, vrh
 
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
+import pip
+try:
+    __import__(lasio)
+except ImportError:
+    pip.main(['install', lasio])
+# pip install lasio
+# import lasio as lasio
+
 
 rho_qz = 2.65
 k_qz = 37
@@ -57,7 +64,7 @@ MU_QUARTZ = 44  # GPa
 K_CLAY = 15  # GPa
 MU_CLAY = 5  # GPa
 
-dropbox = '%HOMEPATH%\\Dropbox'
+# dropbox = '%HOMEPATH%\\Dropbox'
 data_folder = 'Work/QSI/data'
 my_os = platform.system()
 if my_os == 'Windows':
