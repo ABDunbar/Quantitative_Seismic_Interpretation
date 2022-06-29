@@ -6,15 +6,13 @@ from packages.functions import vshale_from_gr, vrh
 from load_las import load
 
 # Rock properties
-K_QUARTZ = 36.8  #GPa
-MU_QUARTZ = 44  #GPa
-K_CLAY = 15  #GPa
-MU_CLAY = 5  #GPa
-
+K_QUARTZ = 36.8  # GPa
+MU_QUARTZ = 44  # GPa
+K_CLAY = 15  # GPa
+MU_CLAY = 5  # GPa
 
 
 def well2_add_features():
-
     well1, well2, well3, well4, well5, well5_resist = load()
 
     # well2 adding features
@@ -48,7 +46,6 @@ def well2_add_features():
     # Facies IV: Silty shales and silt-laminated shale
     # Facies V: Pure shales
     # Facies VI: Chaotic deposits => not used
-
 
     conditions = [
         (well2["DEPTH"].ge(2078.0) & well2["DEPTH"].lt(2105.0)),
@@ -87,5 +84,3 @@ def well2_add_features():
     well2["FCODES"] = np.select(conditions, facies_codes)
 
     return well1, well2, well3, well4, well5, well5_resist
-
-

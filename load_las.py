@@ -13,8 +13,8 @@ elif my_os == 'Linux':
 # get all paths and alphabetically ordered
 paths = sorted(glob.glob(os.path.join(path, "*.las")))
 
-def load():
 
+def load():
     well_df = [0] * len(paths)
 
     for i in range(len(paths)):
