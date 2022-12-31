@@ -9,6 +9,8 @@ if my_os == 'Windows':
     path = ".\data"
 elif my_os == 'Linux':
     path = './data'
+elif my_os == 'Darwin':
+    path = './data'
 
 # get all paths and alphabetically ordered
 paths = sorted(glob.glob(os.path.join(path, "*.las")))
